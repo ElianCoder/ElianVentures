@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv/lib/main.js').config(); // Load environment variables
+require('dotenv').config();
 const fetch = require('isomorphic-fetch');
 const { Client } = require('@microsoft/microsoft-graph-client');
 
