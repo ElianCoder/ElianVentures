@@ -230,15 +230,15 @@
                         <div class="rental-item">
                             <label>
                                 <input type="checkbox" name="item" value="table">
-                                🪑 Tables
+                                 Tables
                             </label>
                             <div class="quantity-selector">
                                 <input type="number" id="tableQty" min="0" max="50" value="0" disabled>
                                 <span>quantity</span>
                             </div>
-                            <select id="tableType" disabled>
-                                <option value="round">Round (coming soon)</option>
+                            <select id="tableType">
                                 <option value="square">Square 8ft</option>
+                                <option value="round">Round (coming soon)</option>   
                             </select>
                         </div>
 
@@ -352,7 +352,6 @@
                               .map(checkbox => checkbox.value)
                               .join(', ')}`
             };
-
             try {
                 // Send data to the server
                 const response = await fetch('http://localhost:3000/request-estimate', {
