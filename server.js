@@ -90,7 +90,7 @@ app.post('/request-estimate', async (req, res) => {
     };
     console.log('Sending email...',emailData); // Debug log
     // Use '/users/{your-email}/sendMail' instead of '/me/sendMail'
-    await client.api(`/users/IanSantos@elianventures.com/sendMail`).post(emailData);
+    await client.api(`/users/CQ@elianventures.com/sendMail`).post(emailData);
 
     console.log('Email sent successfully');
     return res.status(200).send('Estimate request received. We will contact you soon.');
