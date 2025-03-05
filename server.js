@@ -4,16 +4,28 @@ const cors = require('cors');
 require('dotenv').config();
 const fetch = require('isomorphic-fetch');
 const { Client } = require('@microsoft/microsoft-graph-client');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all routes
-app.use(cors());
+// CORS: Allow only the frontend domain
+app.use(cors({
+    origin: ['https://elianrentals.com'],
+    methods: ['POST'],
+}));
 
-// Middleware to parse JSON and form data
+// Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Rate Limiting (Max 10 requests per 15 min)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many requests. Please try again later.',
+});
+app.use('/request-estimate', limiter);
 
 // Function to get an access token
 async function getAccessToken() {
@@ -25,8 +37,6 @@ async function getAccessToken() {
     grant_type: 'client_credentials',
   });
 
-  console.log('Fetching access token...'); // Debug log
-
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -34,16 +44,9 @@ async function getAccessToken() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error fetching access token:', errorText);
-      throw new Error(`Failed to fetch access token: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error('Failed to fetch access token');
 
     const data = await response.json();
-    console.log('Access token retrieved:', data.access_token ? 'Success' : 'Failed');
-    console.log('Access token retrieved:', data.access_token);
-
     return data.access_token;
   } catch (error) {
     console.error('Error in getAccessToken:', error);
@@ -51,10 +54,9 @@ async function getAccessToken() {
   }
 }
 
-// Route to handle estimate requests
+// Route to handle estimate requests (API Key removed)
 app.post('/request-estimate', async (req, res) => {
   const { name, email, message } = req.body;
-
   if (!name || !email || !message) {
     return res.status(400).send('All fields are required.');
   }
@@ -81,22 +83,21 @@ app.post('/request-estimate', async (req, res) => {
         toRecipients: [
           {
             emailAddress: {
-              address: 'IanSantos@elianventures.com', 
+              address: 'IanSantos@elianventures.com',
             },
           },
         ],
       },
       saveToSentItems: false,
     };
-    console.log('Sending email...',emailData); // Debug log
-    // Use '/users/{your-email}/sendMail' instead of '/me/sendMail'
+
+    console.log('Sending email...', emailData);
     await client.api(`/users/IanSantos@elianventures.com/sendMail`).post(emailData);
 
-    console.log('Email sent successfully');
     return res.status(200).send('Estimate request received. We will contact you soon.');
   } catch (error) {
     console.error('Error sending email:', error);
-    return res.status(500).send(`Error sending email: ${error.message}`);
+    return res.status(500).send('Something went wrong. Please try again later.');
   }
 });
 
