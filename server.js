@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS: Allow only the frontend domain
 app.use(cors({
-    origin: ['https://elianventures.com'],
+    origin: ['https://www.elianventures.com'],
     methods: ['POST'],
 }));
 
